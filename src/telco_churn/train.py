@@ -58,6 +58,34 @@ def compare_models(models, X_train, y_train):
     
     return pd.DataFrame(results).T.sort_values("roc_auc", ascending = False)
 
+def tune_xgboost(xgbpipeline, X_train, y_train, n_iter = 40):
+    """Find the best hyperparameters for XGBoost"""
+    param_grid = {
+        "model__n_estimators": [200, 300, 400, 500],
+        "model__max_depth": [3, 4, 5, 6],
+        "model__learning_rate": [0.01, 0.05, 0.1],
+        "model__subsample": [0.7, 0.8, 0.9],
+        "model__colsample_bytree": [0.7, 0.8, 1.0],
+    }
+
+    search = RandomizedSearchCV(
+        estimator = xgbpipeline,
+        param_distributions = param_grid,
+        n_iter = n_iter,
+        scoring = "roc_auc",
+        cv = CV_FOLDS,
+        random_state = RANDOM_STATE,
+        n_jobs = 1
+    )
+    search.fit(X_train, y_train)
+    return search.best_estimator_
+
+def save_model(model, path = MODEL_PATH):
+    """Save the final model to a file"""
+    path.parent.mkdir(parents = True, exist_ok = True)
+    joblib.dump(model, path)
+    print(f"Model saved to {path}")
+
 if __name__ == "__main__":
     from src.telco_churn.preprocess import load_telco_data, split_features_target, split_train_test
 
@@ -71,3 +99,10 @@ if __name__ == "__main__":
     pipelines = build_model_pipelines(X_train, y_train)
     comparison = compare_models(pipelines, X_train, y_train)
     print(comparison)
+
+    # XGBoost optimisation
+    print("--- Tuning XGBoost ----")
+    best_xgb = tune_xgboost(pipelines["XGBoost"], X_train, y_train)
+
+    # Save the model
+    save_model(best_xgb)
