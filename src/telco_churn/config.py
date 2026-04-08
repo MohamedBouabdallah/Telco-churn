@@ -14,3 +14,4 @@ TARGET_COL = "Churn"
 ID_COL = "customerID"
 RANDOM_STATE = 0
 TEST_SIZE = 0.2
+CV_FOLDS = 5
