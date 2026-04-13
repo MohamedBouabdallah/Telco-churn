@@ -51,11 +51,10 @@ def compute_shap_values(model, X_test, categorical_cols, numerical_cols):
 
     return shap_values, transformed_df, feature_names
 
-def recommend_interventions(shap_values_for_row, feature_names, interventions = ACTIONABLE_INTERVENTIONS, top_n = 2):
-    """Identify top actionable features driving churn and suggest interventions"""
+def get_top_actionable_drivers(shap_values_for_row, feature_names, interventions=ACTIONABLE_INTERVENTIONS, top_n=2):
+    """Return the top actionable features that positively drive churn"""
     shap_dict = dict(zip(feature_names, shap_values_for_row))
 
-    # Only keep the variables that we can influence and that drive the churn (shap > 0)
     actionable = {
         feature: shap_value
         for feature, shap_value in shap_dict.items()
@@ -63,20 +62,45 @@ def recommend_interventions(shap_values_for_row, feature_names, interventions = 
     }
 
     if not actionable:
+        return []
+
+    return sorted(actionable, key=actionable.get, reverse=True)[:top_n]
+
+def recommend_interventions(shap_values_for_row, feature_names, interventions=ACTIONABLE_INTERVENTIONS, top_n=2):
+    """Suggest interventions from the top actionable churn drivers"""
+    top_features = get_top_actionable_drivers(
+        shap_values_for_row=shap_values_for_row,
+        feature_names=feature_names,
+        interventions=interventions,
+        top_n=top_n,
+    )
+
+    if not top_features:
         return ["No specific interventions identified."]
-    
-    # Sort by importance and take the top n
-    top_features = sorted(actionable, key = actionable.get, reverse = True)[:top_n]
+
     return [interventions[feature] for feature in top_features]
 
-def attach_recommendations(results_df, shap_values, feature_names):
-    """Add recommendations to the results dataframe"""
+def attach_recommendations(results_df, shap_values, feature_names, interventions=ACTIONABLE_INTERVENTIONS, top_n=2):
+    """Add actionable drivers and interventions to the results dataframe"""
     enriched = results_df.copy()
     shap_array = shap_values.values
-    enriched["interventions"] = [
-        recommend_interventions(shap_array[index], feature_names)
+
+    enriched["actionable_drivers"] = [
+        get_top_actionable_drivers(
+            shap_values_for_row=shap_array[index],
+            feature_names=feature_names,
+            interventions=interventions,
+            top_n=top_n,
+        )
         for index in range(len(enriched))
     ]
+
+    enriched["interventions"] = [
+        [interventions[feature] for feature in drivers]
+        if drivers else ["No specific interventions identified."]
+        for drivers in enriched["actionable_drivers"]
+    ]
+
     return enriched
 
 if __name__ == "__main__":
@@ -96,8 +120,6 @@ if __name__ == "__main__":
     df = load_telco_data()
     X, y = split_features_target(df)
     
-    # Dynamic identification of features (no hardcoding)
-    # We exclude the target if it's in X, and split by type
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
     
@@ -114,7 +136,7 @@ if __name__ == "__main__":
     best_threshold = find_best_threshold(model, X_train, y_train)
     y_pred_custom = (y_proba >= best_threshold).astype(int)
 
-    # Compute SHAP values using the dynamically identified columns
+    # Compute SHAP values
     print("Computing SHAP values...")
     shap_values, transformed_df, feature_names = compute_shap_values(
         model, X_test, categorical_cols, numerical_cols
