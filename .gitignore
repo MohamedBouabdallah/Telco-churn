@@ -5,3 +5,7 @@ models/*.pkl
 
 # Ignore all data
 data/
+
+# Output tables
+outputs/*.csv
+outputs/*.xlsx
