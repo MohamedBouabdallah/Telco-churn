@@ -54,7 +54,7 @@ def plot_confusion_matrix(y_test, y_pred, save_path = None):
     if save_path:
         save_path.parent.mkdir(parents = True, exist_ok = True)
         plt.savefig(save_path)
-        print(f"Confusion matrix saved to {save_path}")
+        print(f"Confusion matrix saved.")
 
     plt.close()
 
@@ -70,10 +70,10 @@ if __name__ == "__main__":
 
     # Load model
     if not MODEL_PATH.exists():
-        print(f"Error : Model not found at this path {MODEL_PATH}")
+        print(f"Error : Model not found at this path.")
     else:
         model = joblib.load(MODEL_PATH)
-        print(f"Model loaded from {MODEL_PATH}")
+        print(f"Model loaded.")
 
         # Search for the optimal threshold on the training set
         print("Optimisation of the decision threshold...")

@@ -84,7 +84,7 @@ def save_model(model, path = MODEL_PATH):
     """Save the final model to a file"""
     path.parent.mkdir(parents = True, exist_ok = True)
     joblib.dump(model, path)
-    print(f"Model saved to {path}")
+    print(f"Model saved.")
 
 if __name__ == "__main__":
     from src.telco_churn.preprocess import load_telco_data, split_features_target, split_train_test

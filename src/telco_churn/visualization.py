@@ -46,7 +46,7 @@ def save_figure(fig, save_path=None, dpi=150, bbox_inches="tight", close=False):
     """Save a matplotlib figure if a path is provided."""
     if save_path is not None:
         fig.savefig(save_path, dpi=dpi, bbox_inches=bbox_inches)
-        print(f"Saved figure to: {save_path}")
+        print(f"Figure saved.")
 
     if close:
         plt.close(fig)
