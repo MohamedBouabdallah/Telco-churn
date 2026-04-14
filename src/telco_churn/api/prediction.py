@@ -123,6 +123,24 @@ def predict_customer(customer):
         "recommendation": recommendation,
     }
 
+def get_active_feature_view(shap_values_for_row, transformed_row, feature_names):
+    """Keep numerical features and only active one-hot encoded categorical features."""
+    active_feature_names = []
+    active_shap_values = []
+
+    for feature_name, shap_value, feature_value in zip(
+        feature_names,
+        shap_values_for_row,
+        transformed_row,
+    ):
+        is_numerical = feature_name in NUMERICAL_COLUMNS
+        is_active_one_hot = feature_name not in NUMERICAL_COLUMNS and feature_value == 1
+
+        if is_numerical or is_active_one_hot:
+            active_feature_names.append(feature_name)
+            active_shap_values.append(shap_value)
+
+    return active_shap_values, active_feature_names
 
 def explain_customer(customer_df, risk_segment):
     """Compute SHAP drivers when possible, otherwise use risk-based advice."""
@@ -139,10 +157,17 @@ def explain_customer(customer_df, risk_segment):
 
         shap_values = EXPLAINER(transformed_df)
         row_values = shap_values.values[0]
+        transformed_row = transformed_df.iloc[0].values
+
+        active_shap_values, active_feature_names = get_active_feature_view(
+            shap_values_for_row=row_values,
+            transformed_row=transformed_row,
+            feature_names=FEATURE_NAMES,
+        )
 
         top_drivers = get_top_actionable_drivers(
-            shap_values_for_row=row_values,
-            feature_names=FEATURE_NAMES,
+            shap_values_for_row=active_shap_values,
+            feature_names=active_feature_names,
             top_n=2,
         )
 
@@ -150,8 +175,8 @@ def explain_customer(customer_df, risk_segment):
             return [], fallback_recommendation(risk_segment)
 
         recommendation = recommend_interventions(
-            shap_values_for_row=row_values,
-            feature_names=FEATURE_NAMES,
+            shap_values_for_row=active_shap_values,
+            feature_names=active_feature_names,
             top_n=2,
         )
 
