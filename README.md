@@ -57,8 +57,6 @@ data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 
 ## Project Structure
 
-## Project Structure
-
 ```text
 .
 ├── data/
@@ -78,6 +76,7 @@ data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 │       │   ├── prediction.py
 │       │   └── schemas.py
 │       ├── config.py
+│       ├── dashboard.py
 │       ├── evaluate.py
 │       ├── preprocess.py
 │       ├── recommend.py
@@ -102,6 +101,7 @@ The trained model pipeline (`models/churn_model.pkl`) is generated locally and i
 - **SHAP** for model interpretability
 - **matplotlib** and **seaborn** for visual analysis
 - **FastAPI**, **Pydantic** and **Uvicorn** for the API layer
+- **Streamlit** for the interactive retention dashboard
 - **pytest** and **httpx** for API tests
 - **Poetry** for dependency management
 
@@ -157,6 +157,28 @@ GET http://127.0.0.1:8000/health
 ```
 
 It returns the API status and whether the saved model was loaded successfully.
+
+## Run the Streamlit Dashboard
+
+The project also includes a Streamlit dashboard that turns the churn model into an interactive retention-support tool. It relies on the FastAPI backend for service health checks and predictions, so the trained model must exist at:
+
+```text
+models/churn_model.pkl
+```
+
+Start the API in one terminal:
+
+```bash
+poetry run uvicorn src.telco_churn.api.main:app --reload
+```
+
+Then start the dashboard in a second terminal:
+
+```bash
+poetry run streamlit run src/telco_churn/dashboard.py
+```
+
+The dashboard allows users to review customer scenarios, adjust profile information, assess churn risk, and explore the main risk factors and recommended retention actions. Example customer profiles are included to make the demo easier to use. Technical request and response details are available through an optional debug mode.
 
 ## API Response
 
