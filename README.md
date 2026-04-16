@@ -219,7 +219,6 @@ This project is currently a portfolio churn modeling and API prototype, not a fu
 Planned improvements include:
 
 - Add stricter input validation for inconsistent service combinations
-- Build a Streamlit UI for interactive exploration and demos
 - Add Dockerization for portable local and cloud deployment
 - Expand API and model behavior tests beyond the current minimal test coverage
 - Add monitoring, calibration checks and deployment documentation
