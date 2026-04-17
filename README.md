@@ -12,7 +12,7 @@ Customer churn is a core issue for subscription-based telecom businesses. When c
 - Analyze churn patterns across tenure, contract type, services, billing behavior and customer profile
 - Explain model predictions globally and at the customer level using SHAP
 - Convert actionable churn drivers into retention recommendation ideas
-- Expose the saved churn pipeline through a lightweight FastAPI API
+- Expose the saved churn pipeline through a lightweight FastAPI API and an interactive Streamlit dashboard
 
 ## Workflow
 
@@ -49,7 +49,7 @@ This project uses the **Telco Customer Churn** dataset available on Kaggle:
 
 [Telco Customer Churn on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
 
-Before running the notebooks or the API, download the dataset and place the CSV file at:
+For deployment simplicity and reproducibility, the public CSV used in the project is included directly in the repository at:
 
 ```text
 data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
@@ -62,7 +62,8 @@ data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 ├── data/
 │   └── raw/
 │       └── WA_Fn-UseC_-Telco-Customer-Churn.csv
-├── models/          # generated locally, not versioned
+├── models/
+│   └── churn_model.pkl
 ├── notebooks/
 │   ├── 01_eda_and_business_insight.ipynb
 │   ├── 02_model_training_evaluation.ipynb
@@ -90,7 +91,12 @@ data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 ```
 
 Key current artifacts include generated analysis figures in `outputs/figures/`.
-The trained model pipeline (`models/churn_model.pkl`) is generated locally and is not versioned in the repository.
+
+For deployment simplicity and reproducibility, the repository includes:
+- the public demo dataset at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`
+- the trained model artifact at `models/churn_model.pkl`
+
+In a production setting, these artifacts would typically be stored outside the code repository.
 
 ## Technologies Used
 
@@ -112,7 +118,7 @@ Install dependencies:
 ```bash
 poetry install
 ```
-Download the dataset from Kaggle and place it at:
+The repository already includes the public demo dataset used by the notebooks and API:
 
 ```text
 data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
@@ -132,7 +138,7 @@ poetry run pytest
 
 ## Run the FastAPI App
 
-To run the API, you must first generate the trained model artifact locally so that the following file exists:
+To run the API, the trained model artifact is expected at:
 
 ```text
 models/churn_model.pkl
@@ -160,7 +166,7 @@ It returns the API status and whether the saved model was loaded successfully.
 
 ## Run the Streamlit Dashboard
 
-The project also includes a Streamlit dashboard that turns the churn model into an interactive retention-support tool. It relies on the FastAPI backend for service health checks and predictions, so the trained model must exist at:
+The project also includes a Streamlit dashboard that turns the churn model into an interactive retention-support tool. It relies on the FastAPI backend for service health checks and predictions, and the trained model artifact is expected at:
 
 ```text
 models/churn_model.pkl
