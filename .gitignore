@@ -1,10 +1,14 @@
 .venv/
 __pycache__/
 .DS_Store
-models/*.pkl
+models/*
+!models/churn_model.pkl
 
-# Ignore all data
-data/
+# data
+data/*
+!data/raw/
+data/raw/*
+!data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
 
 # Output tables
 outputs/*.csv
